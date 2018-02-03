@@ -13,7 +13,7 @@ namespace CompressXPEG
         public DrawPanel(AppStore store)
         {
             this.store = store;
-            store.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(ImagePathChanged);
+            store.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(PropertyChangedEvent);
 
             this.Anchor = AnchorStyles.Bottom | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Left;
             this.BackColor = Color.FromArgb(125, 125, 125);
@@ -23,10 +23,15 @@ namespace CompressXPEG
             this.Paint += new PaintEventHandler(OnPaint);
         }
 
-        private void ImagePathChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void PropertyChangedEvent(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "ImagePath")
             {
+                if (store.Images.Count == 0)
+                {
+                    Bitmap b = new Bitmap(store.ImagePath);
+                    store.AddImage(b);
+                }
                 Invalidate();
             }
         }
@@ -35,13 +40,14 @@ namespace CompressXPEG
         {
             Size output;
 
-            float hPercent =  (this.Height - 24) / (float)img.Height;
+            float hPercent = (this.Height - 24) / (float)img.Height;
             float wPercent = this.Width / (float)img.Width;
             float nPercent;
             if (hPercent < wPercent)
             {
                 nPercent = hPercent;
-            } else
+            }
+            else
             {
                 nPercent = wPercent;
             }
@@ -60,10 +66,9 @@ namespace CompressXPEG
             Graphics g = e.Graphics;
             if (store.ImagePath != null)
             {
-                Bitmap b = new Bitmap(store.ImagePath);
-                Size imgSize = GetFillDimensions(b);
+                Size imgSize = GetFillDimensions(store.Images[0]);
 
-                g.DrawImage(b, 0, 24, imgSize.Width, imgSize.Height);
+                g.DrawImage(store.Images[0], 0, 24, imgSize.Width, imgSize.Height);
             }
         }
 

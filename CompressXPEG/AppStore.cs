@@ -4,11 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
+using System.Drawing;
 
 namespace CompressXPEG
 {
     class AppStore : INotifyPropertyChanged
     {
+
+        public AppStore()
+        {
+            images = new List<Bitmap>();
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -24,6 +30,26 @@ namespace CompressXPEG
                     OnPropertyChanged("ImagePath");
                 }
             }
+        }
+
+        private List<Bitmap> images;
+        public List<Bitmap> Images {
+            get {
+                return images;
+            }
+            set {
+                if (value != images)
+                {
+                    images = value;
+                    OnPropertyChanged("Images");
+                }
+            }
+        }
+
+        public void AddImage(Bitmap b)
+        {
+            images.Add(b);
+            OnPropertyChanged("Images");
         }
 
         protected void OnPropertyChanged(PropertyChangedEventArgs e)

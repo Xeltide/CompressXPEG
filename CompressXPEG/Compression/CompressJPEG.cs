@@ -26,16 +26,57 @@ namespace CompressXPEG.Compression
         // TODO: Remove!!! Only for testing
         public CompressJPEG()
         {
-
+            // Chromanance table
+            /*this.chromQT = new byte[,]{
+                { 17, 18, 24, 47, 99, 99, 99, 99 },
+                { 18, 21, 26, 66, 99, 99, 99, 99 },
+                { 24, 26, 56, 99, 99, 99, 99, 99 },
+                { 47, 66, 99, 99, 99, 99, 99, 99 },
+                { 99, 99, 99, 99, 99, 99, 99, 99 },
+                { 99, 99, 99, 99, 99, 99, 99, 99 },
+                { 99, 99, 99, 99, 99, 99, 99, 99 },
+                { 99, 99, 99, 99, 99, 99, 99, 99 }
+            };*/
+            //Luminance table
+            this.chromQT = new byte[,]{
+                { 16, 11, 10, 16, 24, 40, 51, 61 },
+                { 12, 12, 14, 19, 26, 58, 60, 55 },
+                { 14, 13, 16, 24, 40, 57, 69, 56 },
+                { 14, 17, 22, 29, 51, 87, 80, 62 },
+                { 18, 22, 37, 56, 68, 109, 103, 77 },
+                { 24, 35, 55, 64, 81, 104, 113, 92 },
+                { 49, 64, 78, 87, 103, 121, 120, 101 },
+                { 72, 92, 95, 98, 112, 100, 103, 99 }
+            };
         }
 
         public CompressJPEG(Bitmap b)
         {
             this.bitmap = b;
+            this.chromQT = new byte[,]{
+                { 17, 18, 24, 47, 99, 99, 99, 99 },
+                { 18, 21, 26, 66, 99, 99, 99, 99 },
+                { 24, 26, 56, 99, 99, 99, 99, 99 },
+                { 47, 66, 99, 99, 99, 99, 99, 99 },
+                { 99, 99, 99, 99, 99, 99, 99, 99 },
+                { 99, 99, 99, 99, 99, 99, 99, 99 },
+                { 99, 99, 99, 99, 99, 99, 99, 99 },
+                { 99, 99, 99, 99, 99, 99, 99, 99 }
+            };
+            this.lumQT = new byte[,]{
+                { 16, 11, 10, 16, 24, 40, 51, 61 },
+                { 12, 12, 14, 19, 26, 58, 60, 55 },
+                { 14, 13, 16, 24, 40, 57, 69, 56 },
+                { 14, 17, 22, 29, 51, 87, 80, 62 },
+                { 18, 22, 37, 56, 68, 109, 103, 77 },
+                { 24, 35, 55, 64, 81, 104, 113, 92 },
+                { 49, 64, 78, 87, 103, 121, 120, 101 },
+                { 72, 92, 95, 98, 112, 100, 103, 99 }
+            };
         }
 
         // Public facing compression function
-        public void Compress()
+        public List<byte> Compress()
         {
             BitmapRGBToYCC(this.bitmap);
 
@@ -45,6 +86,78 @@ namespace CompressXPEG.Compression
             List<ByteBlock> yBlocks = DCTChannel(yChannel);
             List<ByteBlock> cbBlocks = DCTChannel(cbChannel);
             List<ByteBlock> crBlocks = DCTChannel(crChannel);
+
+            List<byte> yStream = QuantizeRLE(yBlocks, this.lumQT);
+            List<byte> cbStream = QuantizeRLE(cbBlocks, this.chromQT);
+            List<byte> crStream = QuantizeRLE(crBlocks, this.chromQT);
+
+            yStream.AddRange(cbStream);
+            yStream.AddRange(crStream);
+
+            return yStream;
+        }
+
+        // Quantizes and RLE at the same time to save on looping
+        // TESTED, temp public
+        public List<byte> QuantizeRLE(List<ByteBlock> channel, byte[,] qt)
+        {
+            List<byte> output = new List<byte>();
+
+            foreach (ByteBlock block in channel)
+            {
+                int maxFinal = 7;
+                int maxCurrent = 0;
+                int run = 0;
+                while (maxCurrent <= maxFinal)
+                {
+                    int x = 0;
+                    int y = maxCurrent;
+                    while (x <= maxCurrent)
+                    {
+                        sbyte quantized;
+                        if (x == 0 && y == 0)
+                        {
+                            byte current = block.GetByte(x, y);
+                            quantized = (sbyte)Math.Round((float)current / qt[y, x], MidpointRounding.AwayFromZero);
+                        }
+                        else
+                        {
+                            sbyte current = (sbyte)block.GetByte(x, y);
+                            quantized = (sbyte)Math.Round((float)current / qt[y, x], MidpointRounding.AwayFromZero);
+                        }
+
+                        if (quantized == 0 && run == 0)
+                        {
+                            output.Add(0);
+                            run++;
+                        }
+                        else if (quantized == 0 && run > 0)
+                        {
+                            run++;
+                        }
+                        else if (run > 0)
+                        {
+                            output.Add((byte)run);
+                            run = 0;
+                            output.Add((byte)quantized);
+                        }
+                        else
+                        {
+                            output.Add((byte)quantized);
+                        }
+                        x++;
+                        y--;
+                    }
+                    maxCurrent++;
+                }
+
+                if (run > 0)
+                {
+                    output.Add((byte)run);
+                }
+            }
+
+            return output;
         }
 
         // Constant returned for DCT
@@ -90,9 +203,9 @@ namespace CompressXPEG.Compression
         {
             List<ByteBlock> output = new List<ByteBlock>();
 
-            for (int y = 0; y < channel.GetHeight(); y += 8)
+            for (int y = 0; y + 8 < channel.GetHeight(); y += 8)
             {
-                for (int x = 0; x < channel.GetWidth(); x += 8)
+                for (int x = 0; x + 8 < channel.GetWidth(); x += 8)
                 {
                     output.Add(DCTBlock(channel, x, y));
                 }
@@ -168,5 +281,7 @@ namespace CompressXPEG.Compression
         private ByteBlock yChannel;
         private ByteBlock cbChannel;
         private ByteBlock crChannel;
+        private byte[,] chromQT;
+        private byte[,] lumQT;
     }
 }
