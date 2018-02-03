@@ -1,0 +1,9 @@
+C:\Users\Xeltide\Desktop\Archive\BCIT\Term 4\COMP 4932\CompressXPEG\CompressXPEG\bin\Debug\CompressXPEG.exe.config
+C:\Users\Xeltide\Desktop\Archive\BCIT\Term 4\COMP 4932\CompressXPEG\CompressXPEG\bin\Debug\CompressXPEG.exe
+C:\Users\Xeltide\Desktop\Archive\BCIT\Term 4\COMP 4932\CompressXPEG\CompressXPEG\bin\Debug\CompressXPEG.pdb
+C:\Users\Xeltide\Desktop\Archive\BCIT\Term 4\COMP 4932\CompressXPEG\CompressXPEG\obj\Debug\CompressXPEG.csprojResolveAssemblyReference.cache
+C:\Users\Xeltide\Desktop\Archive\BCIT\Term 4\COMP 4932\CompressXPEG\CompressXPEG\obj\Debug\CompressXPEG.Properties.Resources.resources
+C:\Users\Xeltide\Desktop\Archive\BCIT\Term 4\COMP 4932\CompressXPEG\CompressXPEG\obj\Debug\CompressXPEG.csproj.GenerateResource.Cache
+C:\Users\Xeltide\Desktop\Archive\BCIT\Term 4\COMP 4932\CompressXPEG\CompressXPEG\obj\Debug\CompressXPEG.exe
+C:\Users\Xeltide\Desktop\Archive\BCIT\Term 4\COMP 4932\CompressXPEG\CompressXPEG\obj\Debug\CompressXPEG.pdb
+C:\Users\Xeltide\Desktop\Archive\BCIT\Term 4\COMP 4932\CompressXPEG\CompressXPEG\obj\Debug\CompressXPEG.WindowForm.resources
