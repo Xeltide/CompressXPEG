@@ -56,7 +56,30 @@ namespace CompressXPEG
 
         private void OnJPEG(object sender, EventArgs e)
         {
+            Compression.CompressJPEG cmpress = new Compression.CompressJPEG();
+            Compression.ByteBlock block = new Compression.ByteBlock(8, 8);
+            for (int y = 0; y < 8; y++)
+            {
+                for (int x = 0; x < 8; x++)
+                {
+                    block.SetByte(x, y, (byte)x);
+                    Console.Write(block.GetByte(x, y) + " ");
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine();
 
+            Compression.ByteBlock cull = cmpress.CullPadChannel(block);
+            Compression.ByteBlock dctRes = cmpress.DCTBlock(cull, 0, 0);
+
+            for (int y = 0; y < 8; y++)
+            {
+                for (int x = 0; x < 8; x++)
+                {
+                    Console.Write((sbyte)cull.GetByte(x, y) + " ");
+                }
+                Console.WriteLine();
+            }
         }
 
         private AppStore store;

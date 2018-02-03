@@ -23,6 +23,11 @@ namespace CompressXPEG.Compression
 {
     class CompressJPEG
     {
+        // TODO: Remove!!! Only for testing
+        public CompressJPEG()
+        {
+
+        }
 
         public CompressJPEG(Bitmap b)
         {
@@ -49,7 +54,8 @@ namespace CompressXPEG.Compression
         }
 
         // DCT's and returns an 8x8 block
-        private ByteBlock DCTBlock(ByteBlock input, int xStart, int yStart)
+        // TESTED, temp public
+        public ByteBlock DCTBlock(ByteBlock input, int xStart, int yStart)
         {
             ByteBlock block = new ByteBlock(8, 8);
 
@@ -72,8 +78,8 @@ namespace CompressXPEG.Compression
                             dct += input.GetByte(x + xStart, y + yStart) * xCos * yCos;
                         }
                     }
-
-                    block.SetByte(i, j, (byte)Math.Round((1 / 4) * C(i) * C(j) * dct));
+                    byte pixel = (byte)Math.Round(0.25 * C(i) * C(j) * dct);
+                    block.SetByte(i, j, pixel);
                 }
             }
             return block;
@@ -96,7 +102,8 @@ namespace CompressXPEG.Compression
         }
 
         // Culls every 2nd row/col, and pads to fit 8x8 blocks
-        private ByteBlock CullPadChannel(ByteBlock channel)
+        // TESTED, temp public
+        public ByteBlock CullPadChannel(ByteBlock channel)
         {
             // Culled dimensions
             int resizeW = (int)Math.Round(channel.GetWidth() / 2.0);
@@ -110,11 +117,11 @@ namespace CompressXPEG.Compression
             // Auto pads 0's
             ByteBlock output = new ByteBlock(resizeW, resizeH);
 
-            for (int y = 0; y < channel.GetHeight(); y += 2)
+            for (int y = 0; y * 2 < channel.GetHeight(); y++)
             {
-                for (int x = 0; x < channel.GetWidth(); x += 2)
+                for (int x = 0; x * 2 < channel.GetWidth(); x++)
                 {
-                    output.SetByte(x, y, channel.GetByte(x / 2, y / 2));
+                    output.SetByte(x, y, channel.GetByte(x * 2, y * 2));
                 }
             }
 

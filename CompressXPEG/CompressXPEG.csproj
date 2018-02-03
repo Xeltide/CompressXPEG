@@ -51,7 +51,8 @@
     </Compile>
     <Compile Include="ActionBarColours.cs" />
     <Compile Include="AppStore.cs" />
-    <Compile Include="CompressJPEG.cs" />
+    <Compile Include="Compression\CompressJPEG.cs" />
+    <Compile Include="Compression\ByteBlock.cs" />
     <Compile Include="WindowForm.cs">
       <SubType>Form</SubType>
     </Compile>
