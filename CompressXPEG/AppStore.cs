@@ -13,27 +13,13 @@ namespace CompressXPEG
 
         public AppStore()
         {
-            images = new List<Bitmap>();
+            images = new List<ImageBundle>();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private string imagePath;
-        public string ImagePath {
-            get {
-                return imagePath;
-            }
-            set {
-                if (value != imagePath)
-                {
-                    imagePath = value;
-                    OnPropertyChanged("ImagePath");
-                }
-            }
-        }
-
-        private List<Bitmap> images;
-        public List<Bitmap> Images {
+        private List<ImageBundle> images;
+        public List<ImageBundle> Images {
             get {
                 return images;
             }
@@ -46,10 +32,25 @@ namespace CompressXPEG
             }
         }
 
-        public void AddImage(Bitmap b)
+        private ImageBundle currentImage;
+        public ImageBundle CurrentImage {
+            get {
+                return currentImage;
+            }
+            set {
+                if (value != currentImage)
+                {
+                    currentImage = value;
+                    OnPropertyChanged("CurrentImage");
+                }
+            }
+        }
+
+        public void AddImage(ImageBundle b)
         {
             images.Add(b);
-            OnPropertyChanged("Images");
+            CurrentImage = b;
+            OnPropertyChanged("ImageAdded");
         }
 
         protected void OnPropertyChanged(PropertyChangedEventArgs e)

@@ -51,8 +51,18 @@
     </Compile>
     <Compile Include="ActionBarColours.cs" />
     <Compile Include="AppStore.cs" />
-    <Compile Include="Compression\CompressJPEG.cs" />
-    <Compile Include="Compression\ByteBlock.cs" />
+    <Compile Include="Compression\ColourConverter.cs" />
+    <Compile Include="Compression\DCT.cs" />
+    <Compile Include="Compression\JAPGStream.cs" />
+    <Compile Include="Compression\JAPGCompressor.cs" />
+    <Compile Include="Compression\Block.cs" />
+    <Compile Include="Compression\JAPGDecompressor.cs" />
+    <Compile Include="Compression\Quantizer.cs" />
+    <Compile Include="Compression\RunLength.cs" />
+    <Compile Include="FrameList.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ImageBundle.cs" />
     <Compile Include="WindowForm.cs">
       <SubType>Form</SubType>
     </Compile>

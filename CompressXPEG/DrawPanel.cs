@@ -17,7 +17,6 @@ namespace CompressXPEG
 
             this.Anchor = AnchorStyles.Bottom | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Left;
             this.BackColor = Color.FromArgb(125, 125, 125);
-            this.Dock = DockStyle.Fill;
 
             this.Resize += new EventHandler(OnResize);
             this.Paint += new PaintEventHandler(OnPaint);
@@ -25,13 +24,9 @@ namespace CompressXPEG
 
         private void PropertyChangedEvent(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "ImagePath")
+            string prop = e.PropertyName;
+            if (prop == "ImageAdded" || prop == "CurrentImage")
             {
-                if (store.Images.Count == 0)
-                {
-                    Bitmap b = new Bitmap(store.ImagePath);
-                    store.AddImage(b);
-                }
                 Invalidate();
             }
         }
@@ -64,11 +59,11 @@ namespace CompressXPEG
         private void OnPaint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            if (store.ImagePath != null)
+            if (store.CurrentImage != null)
             {
-                Size imgSize = GetFillDimensions(store.Images[0]);
+                Size imgSize = GetFillDimensions(store.CurrentImage.Image);
 
-                g.DrawImage(store.Images[0], 0, 24, imgSize.Width, imgSize.Height);
+                g.DrawImage(store.CurrentImage.Image, 0, 24, imgSize.Width, imgSize.Height);
             }
         }
 

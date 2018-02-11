@@ -22,7 +22,14 @@ namespace CompressXPEG
             ActionBar bar = new ActionBar(store);
             this.Controls.Add(bar);
 
+            FrameList list = new FrameList(store);
+            list.Size = new Size(200, Height - 62);
+            list.Location = new Point(0, 24);
+            this.Controls.Add(list);
+
             DrawPanel panel = new DrawPanel(store);
+            panel.Size = new Size(Width - 200, Height - 24);
+            panel.Location = new Point(200, 0);
             this.Controls.Add(panel);
         }
 

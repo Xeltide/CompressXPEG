@@ -22,174 +22,98 @@ namespace CompressXPEG
             ToolStripMenuItem newItem = new ToolStripMenuItem("New");
             newItem.Click += new EventHandler(OnNew);
             file.DropDownItems.Add(newItem);
-            ToolStripMenuItem openItem = new ToolStripMenuItem("Open");
+            ToolStripMenuItem openItem = new ToolStripMenuItem("Import");
             openItem.Click += new EventHandler(OnOpen);
             file.DropDownItems.Add(openItem);
+            ToolStripMenuItem importJAPG = new ToolStripMenuItem("Import JAPG");
+            importJAPG.Click += new EventHandler(OnImportJAPG);
+            file.DropDownItems.Add(importJAPG);
+            ToolStripMenuItem importJAMPG = new ToolStripMenuItem("Import JAMPG");
+            importJAMPG.Click += new EventHandler(OnImportJAMPG);
+            file.DropDownItems.Add(importJAMPG);
 
             this.Items.Add(file);
 
             // Compress menu items
             ToolStripMenuItem compress = new ToolStripMenuItem("Compress");
             compress.ForeColor = Color.FromArgb(255, 255, 255);
-            ToolStripMenuItem jpeg = new ToolStripMenuItem("JPEG");
+            ToolStripMenuItem jpeg = new ToolStripMenuItem("JAPG");
             jpeg.Click += new EventHandler(OnJPEG);
             compress.DropDownItems.Add(jpeg);
+            ToolStripMenuItem jampg = new ToolStripMenuItem("JAMPG");
+            jampg.Click += new EventHandler(OnJAMPG);
+            compress.DropDownItems.Add(jampg);
 
             this.Items.Add(compress);
         }
 
         private void OnNew(object sender, EventArgs e)
         {
-            store.ImagePath = null;
+            store.Images = new List<ImageBundle>();
         }
 
         private void OnOpen(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Image Files(*.BMP; *.JPG; *.PNG)| *.BMP; *.JPG; *.PNG; | All files(*.*) | *.*";
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                store.ImagePath = ofd.FileName;
+                ImageBundle ib = new ImageBundle(ofd.FileName);
+                ib.FileName = ofd.SafeFileName;
+                store.AddImage(ib);
+            }
+        }
+
+        private void OnImportJAPG(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Image File(*.JAPG)| *.JAPG; | All files(*.*) | *.*";
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                byte[] rawData = System.IO.File.ReadAllBytes(ofd.FileName);
+                Compression.JAPGDecompressor decompress = new Compression.JAPGDecompressor(rawData);
+                ImageBundle ib = new ImageBundle(decompress.Decompress());
+                ib.FilePath = ofd.FileName;
+                ib.FileName = ofd.SafeFileName;
+                store.AddImage(ib);
+            }
+        }
+
+        private void OnImportJAMPG(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Image File(*.JAMPG)| *.JAMPG; | All files(*.*) | *.*";
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                // TODO: MPEG decompression
             }
         }
 
         private void OnJPEG(object sender, EventArgs e)
         {
+            if (store.CurrentImage != null)
+            {
+                Compression.JAPGCompressor compress = new Compression.JAPGCompressor(store.CurrentImage.Image);
+                List<byte> compressed = compress.Compress();
+                byte[] wByte = BitConverter.GetBytes(store.CurrentImage.Image.Width);
+                byte[] hByte = BitConverter.GetBytes(store.CurrentImage.Image.Height);
+                compressed.Insert(0, hByte[1]);
+                compressed.Insert(0, hByte[0]);
+                compressed.Insert(0, wByte[1]);
+                compressed.Insert(0, wByte[0]);
+                Compression.JAPGStream.ByteToFile(System.IO.Path.ChangeExtension(store.CurrentImage.FilePath, "japg"), compressed.ToArray());
+            }
+        }
+
+        private void OnJAMPG(object sender, EventArgs e)
+        {
             if (store.Images.Count > 0)
             {
-                Compression.CompressJPEG compressor = new Compression.CompressJPEG(store.Images[0]);
-                List<byte> output = compressor.Compress();
-                Console.WriteLine("Raw byte output: " + output.Count);
+                // TODO: MPEG compression
             }
-            /*Compression.CompressJPEG cmpress = new Compression.CompressJPEG();
-            Compression.ByteBlock block = new Compression.ByteBlock(8, 8);
-            for (int y = 0; y < 8; y++)
-            {
-                for (int x = 0; x < 8; x++)
-                {
-                    block.SetByte(x, y, (byte)x);
-                    Console.Write(block.GetByte(x, y) + " ");
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine();
-
-            Compression.ByteBlock cull = cmpress.CullPadChannel(block);
-            Compression.ByteBlock dctRes = cmpress.DCTBlock(cull, 0, 0);
-
-            for (int y = 0; y < 8; y++)
-            {
-                for (int x = 0; x < 8; x++)
-                {
-                    Console.Write((sbyte)cull.GetByte(x, y) + " ");
-                }
-                Console.WriteLine();
-            }
-
-            Console.WriteLine();*/
-            /*Compression.CompressJPEG cmpress = new Compression.CompressJPEG();
-            Compression.ByteBlock test = new Compression.ByteBlock(8, 8);
-            test.SetByte(0, 0, 168);
-            test.SetByte(1, 0, 161);
-            test.SetByte(2, 0, 161);
-            test.SetByte(3, 0, 150);
-            test.SetByte(4, 0, 154);
-            test.SetByte(5, 0, 168);
-            test.SetByte(6, 0, 164);
-            test.SetByte(7, 0, 154);
-
-            test.SetByte(0, 1, 171);
-            test.SetByte(1, 1, 154);
-            test.SetByte(2, 1, 161);
-            test.SetByte(3, 1, 150);
-            test.SetByte(4, 1, 157);
-            test.SetByte(5, 1, 171);
-            test.SetByte(6, 1, 150);
-            test.SetByte(7, 1, 164);
-
-            test.SetByte(0, 2, 171);
-            test.SetByte(1, 2, 168);
-            test.SetByte(2, 2, 147);
-            test.SetByte(3, 2, 164);
-            test.SetByte(4, 2, 164);
-            test.SetByte(5, 2, 161);
-            test.SetByte(6, 2, 143);
-            test.SetByte(7, 2, 154);
-
-            test.SetByte(0, 3, 164);
-            test.SetByte(1, 3, 171);
-            test.SetByte(2, 3, 154);
-            test.SetByte(3, 3, 161);
-            test.SetByte(4, 3, 157);
-            test.SetByte(5, 3, 157);
-            test.SetByte(6, 3, 147);
-            test.SetByte(7, 3, 132);
-
-            test.SetByte(0, 4, 161);
-            test.SetByte(1, 4, 161);
-            test.SetByte(2, 4, 157);
-            test.SetByte(3, 4, 154);
-            test.SetByte(4, 4, 143);
-            test.SetByte(5, 4, 161);
-            test.SetByte(6, 4, 154);
-            test.SetByte(7, 4, 132);
-
-            test.SetByte(0, 5, 164);
-            test.SetByte(1, 5, 161);
-            test.SetByte(2, 5, 161);
-            test.SetByte(3, 5, 154);
-            test.SetByte(4, 5, 150);
-            test.SetByte(5, 5, 157);
-            test.SetByte(6, 5, 154);
-            test.SetByte(7, 5, 140);
-
-            test.SetByte(0, 6, 161);
-            test.SetByte(1, 6, 168);
-            test.SetByte(2, 6, 157);
-            test.SetByte(3, 6, 154);
-            test.SetByte(4, 6, 161);
-            test.SetByte(5, 6, 140);
-            test.SetByte(6, 6, 140);
-            test.SetByte(7, 6, 132);
-
-            test.SetByte(0, 7, 154);
-            test.SetByte(1, 7, 161);
-            test.SetByte(2, 7, 157);
-            test.SetByte(3, 7, 150);
-            test.SetByte(4, 7, 140);
-            test.SetByte(5, 7, 132);
-            test.SetByte(6, 7, 136);
-            test.SetByte(7, 7, 128);
-            Compression.ByteBlock dct = cmpress.DCTBlock(test, 0, 0);
-            // TODO: Confirm that 0, 0 should return 0-255 (unsigned byte)
-            //       and rest return signed byte
-            for (int y = 0; y < 8; y++)
-            {
-                for (int x = 0; x < 8; x++)
-                {
-                    Console.Write(dct.GetByte(x, y) + " ");
-                }
-                Console.WriteLine();
-            }
-
-            Console.WriteLine();
-            List<Compression.ByteBlock> wrapper = new List<Compression.ByteBlock>();
-            wrapper.Add(dct);
-            byte[,] lumQT = new byte[,]{
-                { 16, 11, 10, 16, 24, 40, 51, 61 },
-                { 12, 12, 14, 19, 26, 58, 60, 55 },
-                { 14, 13, 16, 24, 40, 57, 69, 56 },
-                { 14, 17, 22, 29, 51, 87, 80, 62 },
-                { 18, 22, 37, 56, 68, 109, 103, 77 },
-                { 24, 35, 55, 64, 81, 104, 113, 92 },
-                { 49, 64, 78, 87, 103, 121, 120, 101 },
-                { 72, 92, 95, 98, 112, 100, 103, 99 }
-            };
-            List<byte> quantized = cmpress.QuantizeRLE(wrapper, lumQT);
-            foreach (byte b in quantized)
-            {
-                Console.WriteLine((sbyte)b);
-            }*/
         }
 
         private AppStore store;
